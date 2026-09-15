@@ -62,3 +62,34 @@ pub fn play_song(id: &str, app: &Application) {
         log::warn!("No audio model found");
     }
 }
+
+pub fn play_instant_mix(id: &str, app: &Application) {
+    let library = app.library();
+    let seed = library.all_songs().into_iter().find(|s| s.id() == id);
+    let backend = app.backend();
+    let seed_id = id.to_string();
+    let app_for_cb = app.clone();
+
+    app.http_with_loading(
+        async move { backend.get_similar_songs(&seed_id, 50).await },
+        move |result| match result {
+            Ok(items) => {
+                let mut songs: Vec<SongModel> = seed.iter().cloned().collect();
+                songs.extend(
+                    items
+                        .items
+                        .iter()
+                        .filter(|dto| seed.as_ref().is_none_or(|s| s.id() != dto.id))
+                        .map(|dto| SongModel::new(dto, library.song_is_favorite(&dto.id))),
+                );
+
+                if let Some(audio_model) = app_for_cb.audio_model() {
+                    audio_model.set_queue(songs, 0, true);
+                } else {
+                    log::warn!("No audio model found");
+                }
+            }
+            Err(err) => log::warn!("Instant Mix failed: {err}"),
+        },
+    );
+}

@@ -309,6 +309,13 @@ where
         }
     }
 
+    fn on_instant_mix(&self) {
+        if let Some(song_model) = self.audio_model().current_song() {
+            let app = self.obj().get_application();
+            crate::library_utils::play_instant_mix(&song_model.id(), &app);
+        }
+    }
+
     fn setup_menu(&self) {
         let options = ContextActions {
             can_remove_from_playlist: false,
@@ -337,6 +344,9 @@ where
         });
         klass.install_action("song.queue_last", None, |player, _, _| {
             player.imp().on_queue_last();
+        });
+        klass.install_action("song.instant_mix", None, |player, _, _| {
+            player.imp().on_instant_mix();
         });
         klass.install_action("song.go_to_album", None, |player, _, _| {
             player.imp().on_go_to_album();

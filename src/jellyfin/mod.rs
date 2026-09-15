@@ -255,6 +255,23 @@ impl Jellyfin {
         Ok(serde_json::from_str(&body)?)
     }
 
+    pub async fn get_similar_songs(
+        &self,
+        item_id: &str,
+        count: u32,
+    ) -> Result<PlaylistItems, BackendError> {
+        let limit = count.to_string();
+        let params = vec![
+            ("userId", self.user_id.as_str()),
+            ("limit", limit.as_str()),
+            ("fields", "DateCreated,Genres"),
+        ];
+        let path = format!("Items/{}/InstantMix", item_id);
+        let response = self.get(&path, Some(&params)).await?;
+        let body = self.handle_response(response).await?;
+        Ok(serde_json::from_str(&body)?)
+    }
+
     pub async fn add_playlist_items(
         &self,
         playlist_id: &str,

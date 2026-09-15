@@ -457,6 +457,50 @@ impl Subsonic {
         })
     }
 
+    // https://github.com/opensubsonic/open-subsonic-api/blob/main/content/en/docs/Endpoints/getsimilarsongs2.md
+    pub async fn get_similar_songs(
+        &self,
+        item_id: &str,
+        count: u32,
+    ) -> Result<PlaylistItems, BackendError> {
+        debug!("Subsonic::get_similar_songs(item_id={item_id}, count={count})");
+
+        let response = self
+            .get_subsonic(
+                "getSimilarSongs2",
+                &[
+                    ("id".to_string(), item_id.to_string()),
+                    ("count".to_string(), count.to_string()),
+                ],
+            )
+            .await?;
+        self.ensure_ok_response(&response)?;
+
+        let album_fallback = AlbumFallback {
+            album_artists: vec![],
+            album_id: None,
+            album_name: None,
+            artist_name: None,
+            artist_id: None,
+            year: None,
+            created: None,
+            cover_art: None,
+        };
+
+        let items = response
+            .similar_songs2
+            .map(|payload| payload.song)
+            .unwrap_or_default()
+            .into_iter()
+            .map(|song| self.song_to_music_dto(song, &album_fallback))
+            .collect::<Vec<_>>();
+
+        Ok(PlaylistItems {
+            total_record_count: items.len() as u64,
+            items,
+        })
+    }
+
     // https://github.com/opensubsonic/open-subsonic-api/blob/main/content/en/docs/Endpoints/createplaylist.md
     pub async fn new_playlist(
         &self,

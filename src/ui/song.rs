@@ -317,6 +317,11 @@ impl Song {
         }
     }
 
+    fn on_instant_mix(&self) {
+        let app = self.get_application();
+        crate::library_utils::play_instant_mix(&self.song_id(), &app);
+    }
+
     fn on_go_to_album(&self) {
         self.emit_by_name::<()>("album-clicked", &[&self.song_id()]);
     }
@@ -421,6 +426,9 @@ mod imp {
             });
             klass.install_action("song.queue_last", None, |song, _, _| {
                 song.on_queue_last();
+            });
+            klass.install_action("song.instant_mix", None, |song, _, _| {
+                song.on_instant_mix();
             });
             klass.install_action("song.go_to_album", None, |song, _, _| {
                 song.on_go_to_album();

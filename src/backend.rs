@@ -91,6 +91,17 @@ impl Backend {
         }
     }
 
+    pub async fn get_similar_songs(
+        &self,
+        item_id: &str,
+        count: u32,
+    ) -> Result<PlaylistItems, BackendError> {
+        match self {
+            Self::Jellyfin(jellyfin) => jellyfin.get_similar_songs(item_id, count).await,
+            Self::Subsonic(subsonic) => subsonic.get_similar_songs(item_id, count).await,
+        }
+    }
+
     pub async fn new_playlist(
         &self,
         name: &str,

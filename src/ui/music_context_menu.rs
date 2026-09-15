@@ -116,6 +116,12 @@ fn create_menu_model(config: &ContextActions) -> gio::Menu {
             Some(&tr("Queue Last")),
             Some(&format!("{}.queue_last", config.action_prefix)),
         );
+        if config.action_prefix == "song" {
+            queue_section.append(
+                Some(&tr("Instant Mix")),
+                Some(&format!("{}.instant_mix", config.action_prefix)),
+            );
+        }
         menu.append_section(None, &queue_section);
     }
     // Playlist section

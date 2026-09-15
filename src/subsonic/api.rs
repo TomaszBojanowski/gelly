@@ -60,6 +60,13 @@ pub struct SubsonicResponse {
     pub song: Option<Song>,
     pub lyrics_list: Option<LyricsList>,
     pub starred2: Option<Starred2Payload>,
+    pub similar_songs2: Option<SimilarSongs2Payload>,
+}
+
+#[derive(Debug, Clone, Deserialize)]
+pub struct SimilarSongs2Payload {
+    #[serde(default, deserialize_with = "deserialize_items_skip_errors")]
+    pub song: Vec<Song>,
 }
 
 impl SubsonicResponse {
